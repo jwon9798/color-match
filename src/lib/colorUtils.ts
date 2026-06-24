@@ -102,14 +102,41 @@ export function labToRgb({ L, a, b }: Lab): RGB {
   };
 }
 
-/** CIEDE2000 — 국제 표준 색차 공식 */
-export function deltaE2000(l1: Lab, l2: Lab): number {
+export type DeltaE2000Analysis = {
+  deltaE: number;
+  /** 밝기 차이 (L*) */
+  deltaL: number;
+  /** 채도 차이 (C*) */
+  deltaC: number;
+  /** 색상 차이 (h*, degree) — 저채도일 때 0 */
+  deltaH: number;
+  /** CIEDE2000 정규화 항 (밝기) */
+  lightnessTerm: number;
+  /** CIEDE2000 정규화 항 (채도) */
+  chromaTerm: number;
+  /** CIEDE2000 정규화 항 (색상) */
+  hueTerm: number;
+  avgChroma: number;
+};
+
+function computeDeltaE2000(l1: Lab, l2: Lab): DeltaE2000Analysis {
+  const zero: DeltaE2000Analysis = {
+    deltaE: 0,
+    deltaL: 0,
+    deltaC: 0,
+    deltaH: 0,
+    lightnessTerm: 0,
+    chromaTerm: 0,
+    hueTerm: 0,
+    avgChroma: 0,
+  };
+
   if (
     Math.abs(l1.L - l2.L) < 1e-6 &&
     Math.abs(l1.a - l2.a) < 1e-6 &&
     Math.abs(l1.b - l2.b) < 1e-6
   ) {
-    return 0;
+    return zero;
   }
 
   const avgLp = (l1.L + l2.L) / 2;
@@ -158,17 +185,38 @@ export function deltaE2000(l1: Lab, l2: Lab): number {
   const sc = 1 + 0.045 * avgCp;
   const sh = 1 + 0.015 * avgCp * t;
 
+  const lightnessTerm = Math.abs(dLp) / sl;
+  const chromaTerm = Math.abs(dCp) / sc;
+  const hueTerm = Math.abs(dHp) / sh;
+
   const de = Math.sqrt(
-    (dLp / sl) ** 2 +
-      (dCp / sc) ** 2 +
-      (dHp / sh) ** 2 +
+    lightnessTerm ** 2 +
+      chromaTerm ** 2 +
+      hueTerm ** 2 +
       rt * (dCp / sc) * (dHp / sh),
   );
 
-  return Number.isFinite(de) ? Math.max(0, de) : 0;
+  const deltaH =
+    c1p < 3 && c2p < 3 ? 0 : Math.abs(dhp);
+
+  return {
+    deltaE: Number.isFinite(de) ? Math.max(0, de) : 0,
+    deltaL: Math.abs(dLp),
+    deltaC: Math.abs(dCp),
+    deltaH,
+    lightnessTerm,
+    chromaTerm,
+    hueTerm,
+    avgChroma: avgCp,
+  };
 }
 
-/** ΔE 앵커 보간 — 색차학 기준점 기반 (애매한 지수식 대신) */
+/** CIEDE2000 — 국제 표준 색차 공식 */
+export function deltaE2000(l1: Lab, l2: Lab): number {
+  return computeDeltaE2000(l1, l2).deltaE;
+}
+
+/** ΔE 앵커 보간 — 색차학 기준점 기반 */
 const DE_ANCHORS: readonly [de: number, score: number][] = [
   [0, 100],
   [0.5, 99.5],
@@ -189,6 +237,24 @@ const DE_ANCHORS: readonly [de: number, score: number][] = [
   [100, 0],
 ];
 
+/** CIEDE2000 정규화 항 → 0–100 (ΔE 구성요소와 동일 스케일) */
+const COMPONENT_ANCHORS: readonly [de: number, score: number][] = [
+  [0, 100],
+  [0.5, 98],
+  [1, 95],
+  [1.5, 91],
+  [2, 86],
+  [2.3, 82],
+  [3, 76],
+  [5, 58],
+  [7, 45],
+  [10, 30],
+  [15, 15],
+  [20, 8],
+  [30, 2],
+  [50, 0],
+];
+
 function interpolateAnchors(value: number, anchors: readonly [number, number][]): number {
   if (value <= anchors[0][0]) return anchors[0][1];
   const last = anchors[anchors.length - 1];
@@ -205,38 +271,20 @@ function interpolateAnchors(value: number, anchors: readonly [number, number][])
   return 0;
 }
 
-function componentScore(diff: number, noticeableAt: number, power = 1.15): number {
-  const t = Math.min(1, Math.max(0, diff / noticeableAt));
-  return 100 * (1 - t ** power);
-}
-
-function hueDifferenceDeg(lab1: Lab, lab2: Lab): number {
-  const c1 = Math.hypot(lab1.a, lab1.b);
-  const c2 = Math.hypot(lab2.a, lab2.b);
-  if (c1 < 1.5 && c2 < 1.5) return 0;
-
-  const h1 = Math.atan2(lab1.b, lab1.a);
-  const h2 = Math.atan2(lab2.b, lab2.a);
-  let dh = Math.abs(h1 - h2) * (180 / Math.PI);
-  if (dh > 180) dh = 360 - dh;
-  return dh;
-}
-
 function analyzeComponents(submitted: Lab, target: Lab) {
-  const deltaE = deltaE2000(submitted, target);
-  const dL = Math.abs(submitted.L - target.L);
-  const cS = Math.hypot(submitted.a, submitted.b);
-  const cT = Math.hypot(target.a, target.b);
-  const dC = Math.abs(cS - cT);
-  const dH = hueDifferenceDeg(submitted, target);
+  const analysis = computeDeltaE2000(submitted, target);
+  const { deltaE, lightnessTerm, chromaTerm, hueTerm, avgChroma } = analysis;
 
   const deltaEScore = interpolateAnchors(deltaE, DE_ANCHORS);
-  const lightnessScore = componentScore(dL, 10, 1.2);
-  const hueScore = componentScore(dH, 12, 1.05);
-  const chromaScore = componentScore(dC, 16, 1.1);
+  const lightnessScore = interpolateAnchors(lightnessTerm, COMPONENT_ANCHORS);
+  const chromaScore = interpolateAnchors(chromaTerm, COMPONENT_ANCHORS);
+  const hueScore =
+    avgChroma < 3
+      ? 100
+      : interpolateAnchors(hueTerm, COMPONENT_ANCHORS);
 
   return {
-    deltaE,
+    ...analysis,
     deltaEScore,
     lightnessScore,
     hueScore,
@@ -251,11 +299,21 @@ function analyzeComponents(submitted: Lab, target: Lab) {
 }
 
 export function getMatchGrade(percent: number, deltaE: number): MatchGrade {
-  if (!Number.isFinite(percent)) return "D";
+  if (!Number.isFinite(percent) || !Number.isFinite(deltaE)) return "D";
   if (deltaE <= 2.3 && percent >= 94) return "S";
   if (deltaE <= 5 && percent >= 86) return "A";
   if (deltaE <= 10 && percent >= 70) return "B";
   if (deltaE <= 20 && percent >= 45) return "C";
+  return "D";
+}
+
+/** 평균 점수만 있을 때 (마라톤 최종 등) */
+export function getMatchGradeFromPercent(percent: number): MatchGrade {
+  if (!Number.isFinite(percent)) return "D";
+  if (percent >= 94) return "S";
+  if (percent >= 86) return "A";
+  if (percent >= 70) return "B";
+  if (percent >= 45) return "C";
   return "D";
 }
 
@@ -274,13 +332,8 @@ export function evaluateMatch(submitted: RGB, target: RGB): MatchEvaluation {
   const labT = rgbToLab(target);
   const analysis = analyzeComponents(labS, labT);
 
-  const raw =
-    analysis.deltaEScore * 0.5 +
-    analysis.lightnessScore * 0.25 +
-    analysis.hueScore * 0.15 +
-    analysis.chromaScore * 0.1;
-
-  const percent = Math.round(Math.max(0, Math.min(100, raw)) * 10) / 10;
+  const percent =
+    Math.round(Math.max(0, Math.min(100, analysis.deltaEScore)) * 10) / 10;
 
   return {
     percent,

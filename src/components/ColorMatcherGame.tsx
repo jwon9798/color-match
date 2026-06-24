@@ -17,6 +17,7 @@ import {
   evaluateMatch,
   generateTarget,
   getMatchGrade,
+  getMatchGradeFromPercent,
   rgbToCss,
   type MatchEvaluation,
   type MatchGrade,
@@ -317,7 +318,7 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
 
   if (phase === "final-result" && isMarathon) {
     const finalScore = averageScore(roundScores);
-    const finalGrade = getMatchGrade(finalScore, 100 - finalScore * 0.5);
+    const finalGrade = getMatchGradeFromPercent(finalScore);
     const gradeStyle = GRADE_STYLE[finalGrade];
 
     return (

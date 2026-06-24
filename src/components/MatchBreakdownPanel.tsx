@@ -53,7 +53,7 @@ export default function MatchBreakdownPanel({
         })}
       </div>
       <p className="mt-3 text-[10px] leading-relaxed text-amber-600/80">
-        CIEDE2000 색차 + 밝기·색상·채도 항목을 가중 합산한 종합 점수입니다.
+        CIEDE2000 색차(ΔE)를 0–100%로 변환한 종합 점수입니다. 밝기·색상·채도는 ΔE 구성요소별 일치도입니다.
       </p>
     </div>
   );
