@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 컬러 매처
 
-## Getting Started
+물감(R·G·B·W)을 섞어 타겟 색과 맞추는 웹 게임입니다.
 
-First, run the development server:
+## 로컬 실행
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 광고 (Google AdSense)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. [Google AdSense](https://www.google.com/adsense/)에서 사이트 등록 및 승인
+2. **광고 단위** 생성 (반응형 디스플레이 권장)
+3. `.env.example`을 `.env.local`로 복사 후 값 입력:
 
-## Learn More
+```env
+NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+NEXT_PUBLIC_GOOGLE_ADSENSE_SLOT=1234567890
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. 배포 후 AdSense에서 사이트 소유 확인 (`ads.txt`는 `/ads.txt`에서 자동 제공)
+5. **개인정보 처리방침** 페이지: `/privacy` (AdSense 필수)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+개발 모드에서는 AdSense 미설정 시 점선 플레이스홀더가 표시됩니다. 프로덕션에서는 env 미설정 시 광고 영역이 숨겨집니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Vercel 배포
 
-## Deploy on Vercel
+```bash
+npm run build
+npx vercel login
+npx vercel --prod
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Vercel 대시보드 → Project → Settings → Environment Variables에 AdSense 변수를 추가한 뒤 **Redeploy** 하세요.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| 변수 | 설명 |
+|------|------|
+| `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT` | 발행자 ID (`ca-pub-...`) |
+| `NEXT_PUBLIC_GOOGLE_ADSENSE_SLOT` | 기본 광고 단위 ID |
+| `NEXT_PUBLIC_ADS_ENABLED` | `false`면 광고 끔 |
+
+## 스크립트
+
+| 명령 | 설명 |
+|------|------|
+| `npm run dev` | 개발 서버 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm run start` | 빌드 결과 실행 |
+| `npm run lint` | ESLint |
