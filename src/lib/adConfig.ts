@@ -13,8 +13,13 @@ export type AdPlacementId =
   | "side-left"
   | "side-right";
 
+/** Google AdSense publisher ID (ads.txt) */
+export const GOOGLE_ADSENSE_PUBLISHER_ID = "pub-4911271163170466";
+
+/** Google AdSense client ID (광고 스크립트용 ca-pub-...) */
 export const GOOGLE_ADSENSE_CLIENT =
-  process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT ?? "";
+  process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT ??
+  "ca-pub-4911271163170466";
 
 export const ADS_ENABLED =
   process.env.NEXT_PUBLIC_ADS_ENABLED !== "false" &&
@@ -48,12 +53,11 @@ export function isAdPlacementConfigured(placement: AdPlacementId): boolean {
 }
 
 export function getAdsTxtPublisherId(): string {
-  const explicit = process.env.GOOGLE_ADSENSE_PUBLISHER_ID;
-  if (explicit) return explicit;
+  return (
+    process.env.GOOGLE_ADSENSE_PUBLISHER_ID ?? GOOGLE_ADSENSE_PUBLISHER_ID
+  );
+}
 
-  if (GOOGLE_ADSENSE_CLIENT.startsWith("ca-pub-")) {
-    return GOOGLE_ADSENSE_CLIENT.replace("ca-pub-", "pub-");
-  }
-
-  return "";
+export function getAdsTxtContent(): string {
+  return `google.com, ${getAdsTxtPublisherId()}, DIRECT, f08c47fec0942fa0\n`;
 }
