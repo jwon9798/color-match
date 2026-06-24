@@ -1,0 +1,16 @@
+{
+  "name": "컬러 매처",
+  "short_name": "컬러매처",
+  "description": "물감을 섞어 타겟 색상과 가장 비슷한 색을 만들어보세요!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBEB",
+  "theme_color": "#F59E0B",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

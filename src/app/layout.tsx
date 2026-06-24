@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "컬러 매처",
   description: "물감을 섞어 타겟 색상과 가장 비슷한 색을 만들어보세요!",
+  manifest: "/manifest.webmanifest",
+  applicationName: "컬러 매처",
+  appleWebApp: {
+    title: "컬러 매처",
+    capable: true,
+  },
 };
 
 export const viewport: Viewport = {
@@ -23,6 +29,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  themeColor: "#F59E0B",
 };
 
 export default function RootLayout({
