@@ -1,0 +1,21 @@
+type BrandIconProps = {
+  className?: string;
+};
+
+export default function BrandIcon({ className = "h-full w-full" }: BrandIconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 512 512"
+      className={className}
+      aria-hidden
+    >
+      <rect width="512" height="512" rx="108" fill="#F59E0B" />
+      <rect x="32" y="32" width="448" height="448" rx="88" fill="#FBBF24" />
+      <circle cx="256" cy="178" r="82" fill="#EF4444" />
+      <circle cx="168" cy="328" r="82" fill="#22C55E" />
+      <circle cx="344" cy="328" r="82" fill="#3B82F6" />
+      <circle cx="256" cy="268" r="34" fill="#FFFFFF" />
+    </svg>
+  );
+}

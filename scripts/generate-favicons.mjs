@@ -6,7 +6,7 @@ import toIco from "to-ico";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const source = path.join(__dirname, "favicon-source.png");
+const source = path.join(__dirname, "icon.svg");
 
 const appDir = path.join(root, "src", "app");
 const publicDir = path.join(root, "public");
@@ -31,7 +31,7 @@ async function main() {
   await sharp(input).resize(192, 192).png().toFile(path.join(publicDir, "icon-192.png"));
   await sharp(input).resize(512, 512).png().toFile(path.join(publicDir, "icon-512.png"));
 
-  console.log("Favicons generated.");
+  console.log("Favicons generated from scripts/icon.svg");
 }
 
 main().catch((error) => {
