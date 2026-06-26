@@ -1,3 +1,6 @@
+import CookieConsent from "@/components/CookieConsent";
+import SiteFooter from "@/components/SiteFooter";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import GoogleAdSense from "@/components/GoogleAdSense";
@@ -14,13 +17,39 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "컬러 매처",
-  description: "물감을 섞어 타겟 색상과 가장 비슷한 색을 만들어보세요!",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} — 무료 색감 매칭 게임`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: [
+    "컬러 매처",
+    "색 맞추기 게임",
+    "색감 테스트",
+    "물감 섞기",
+    "색 혼합 게임",
+    "미니 게임",
+    "웹 게임",
+    "무료 게임",
+  ],
   manifest: "/manifest.webmanifest",
-  applicationName: "컬러 매처",
+  applicationName: SITE_NAME,
   appleWebApp: {
-    title: "컬러 매처",
+    title: SITE_NAME,
     capable: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — 무료 색감 매칭 게임`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   icons: {
     icon: [
@@ -51,9 +80,11 @@ export default function RootLayout({
       lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col">
         <GoogleAdSense />
-        {children}
+        <div className="flex min-h-full flex-1 flex-col">{children}</div>
+        <SiteFooter />
+        <CookieConsent />
       </body>
     </html>
   );
