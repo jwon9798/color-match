@@ -5,9 +5,9 @@ export const SITE_URL =
 export const SITE_DESCRIPTION =
   "물감(R·G·B·W)을 섞어 타겟 색상과 가장 비슷한 색을 만드는 무료 브라우저 색감 게임입니다.";
 
-/** AdSense 심사·문의용 — Vercel에 반드시 설정하세요 */
+/** AdSense 심사·문의용 — Vercel env로 덮어쓸 수 있음 */
 export const CONTACT_EMAIL =
-  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "";
+  process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "jwon9798@gmail.com";
 
 export const LEGAL_PAGES = [
   { href: "/guide", label: "게임 가이드" },
