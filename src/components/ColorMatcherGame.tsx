@@ -3,7 +3,8 @@
 import AdSlot from "@/components/AdSlot";
 import ColorSwatch from "@/components/ColorSwatch";
 import MatchBreakdownPanel from "@/components/MatchBreakdownPanel";
-import PercentileBadge from "@/components/PercentileBadge";
+import ResultHeroCard from "@/components/ResultHeroCard";
+import ShareResultPanel from "@/components/ShareResultPanel";
 import PaletteCanvas, {
   type BrushSizeKey,
   type BrushTool,
@@ -20,15 +21,14 @@ import {
   getMatchGrade,
   getMatchGradeFromPercent,
   getTopPercentile,
-  formatTopPercentile,
   rgbToCss,
   type MatchEvaluation,
-  type MatchGrade,
   type RGB,
 } from "@/lib/colorUtils";
+import type { ShareCardData } from "@/lib/shareCard";
 import { BRUSH_SIZES } from "@/lib/paintEngine";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TOOLS: { id: BrushTool; label: string; color?: string; icon: string }[] = [
   { id: "paint-r", label: "R", color: "#dc3232", icon: "🔴" },
@@ -46,17 +46,6 @@ type RoundResult = MatchEvaluation & {
   target: RGB;
 };
 
-const GRADE_STYLE: Record<
-  MatchGrade,
-  { bg: string; text: string; ring: string }
-> = {
-  S: { bg: "bg-amber-400", text: "text-amber-950", ring: "ring-amber-300" },
-  A: { bg: "bg-emerald-400", text: "text-emerald-950", ring: "ring-emerald-300" },
-  B: { bg: "bg-sky-400", text: "text-sky-950", ring: "ring-sky-300" },
-  C: { bg: "bg-orange-300", text: "text-orange-950", ring: "ring-orange-200" },
-  D: { bg: "bg-stone-300", text: "text-stone-800", ring: "ring-stone-200" },
-};
-
 function BackToHomeButton({
   className = "",
   fullWidth = false,
@@ -71,45 +60,6 @@ function BackToHomeButton({
     >
       ← 메인으로
     </Link>
-  );
-}
-
-async function copyTextToClipboard(text: string): Promise<boolean> {
-  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      /* fallback below */
-    }
-  }
-
-  try {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.left = "-9999px";
-    document.body.appendChild(textarea);
-    textarea.select();
-    const ok = document.execCommand("copy");
-    document.body.removeChild(textarea);
-    return ok;
-  } catch {
-    return false;
-  }
-}
-
-function ShareNotice({ message }: { message: string | null }) {
-  if (!message) return null;
-  return (
-    <p
-      role="status"
-      aria-live="polite"
-      className="text-center text-sm font-medium text-amber-700"
-    >
-      {message}
-    </p>
   );
 }
 
@@ -167,7 +117,6 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
   const [ready, setReady] = useState(false);
   const [questionIndex, setQuestionIndex] = useState(1);
   const [roundScores, setRoundScores] = useState<number[]>([]);
-  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const loadNewTarget = useCallback(() => {
     const next = generateTarget();
@@ -193,11 +142,55 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
     setReady(true);
   }, [loadNewTarget]);
 
-  useEffect(() => {
-    if (!shareMessage) return;
-    const timer = window.setTimeout(() => setShareMessage(null), 3000);
-    return () => window.clearTimeout(timer);
-  }, [shareMessage]);
+  const shareCardData = useMemo((): ShareCardData | null => {
+    if (phase === "final-result" && isMarathon && roundScores.length > 0) {
+      const avg = averageScore(roundScores);
+      const grade = getMatchGradeFromPercent(avg);
+      return {
+        mode: "marathon-final",
+        grade,
+        score: avg,
+        targetColor: result?.target ?? { r: 128, g: 128, b: 128 },
+        userColor: result?.submitted ?? { r: 128, g: 128, b: 128 },
+        percentile: getTopPercentile(avg),
+        averageScore: avg,
+        roundScores,
+        label: modeConfig.title,
+      };
+    }
+
+    if (!result) return null;
+
+    if (phase === "question-result" && isMarathon) {
+      const grade = result.grade ?? getMatchGrade(result.percent, result.deltaE ?? 100);
+      return {
+        mode: "marathon-round",
+        grade,
+        score: result.percent,
+        targetColor: result.target,
+        userColor: result.submitted,
+        percentile: result.topPercentile,
+        label: result.label,
+        round: questionIndex,
+        totalRounds: modeConfig.totalQuestions,
+      };
+    }
+
+    if (phase === "result" && !isMarathon) {
+      const grade = result.grade ?? getMatchGrade(result.percent, result.deltaE ?? 100);
+      return {
+        mode: "single",
+        grade,
+        score: result.percent,
+        targetColor: result.target,
+        userColor: result.submitted,
+        percentile: result.topPercentile,
+        label: result.label,
+      };
+    }
+
+    return null;
+  }, [phase, isMarathon, roundScores, result, questionIndex, modeConfig]);
 
   const handleColorPick = useCallback((color: RGB) => {
     setPickedColor(color);
@@ -268,51 +261,6 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
     setPhase("playing");
   }, [loadNewTarget]);
 
-  const buildShareText = useCallback((): string | null => {
-    if (phase === "final-result" && isMarathon && roundScores.length > 0) {
-      const avg = averageScore(roundScores);
-      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${avg.toFixed(1)}점 · ${formatTopPercentile(getTopPercentile(avg))}`;
-    }
-
-    if (!result) return null;
-
-    if (isMarathon) {
-      const scores = roundScores.length > 0 ? roundScores : [result.percent];
-      const avg = averageScore(scores);
-      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${avg.toFixed(1)}점 · ${formatTopPercentile(getTopPercentile(avg))}`;
-    }
-
-    const deltaE = result.deltaE ?? 0;
-    return `🎨 컬러 매처\n${result.grade}등급 · ${result.percent.toFixed(1)}% · ${formatTopPercentile(result.topPercentile)} (ΔE ${deltaE.toFixed(1)})`;
-  }, [phase, isMarathon, roundScores, result, modeConfig.title]);
-
-  const handleShare = useCallback(async () => {
-    const text = buildShareText();
-    if (!text) {
-      setShareMessage("공유할 결과가 없습니다.");
-      return;
-    }
-
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      try {
-        await navigator.share({ title: "컬러 매처", text });
-        setShareMessage("공유했습니다!");
-        return;
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return;
-        }
-      }
-    }
-
-    const copied = await copyTextToClipboard(text);
-    setShareMessage(
-      copied
-        ? "결과가 클립보드에 복사되었습니다!"
-        : "복사에 실패했습니다. 다시 시도해 주세요.",
-    );
-  }, [buildShareText]);
-
   if (!ready || !target) {
     return (
       <div className="flex flex-1 items-center justify-center py-20 text-amber-700">
@@ -325,65 +273,60 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
     const finalScore = averageScore(roundScores);
     const finalGrade = getMatchGradeFromPercent(finalScore);
     const finalTopPercentile = getTopPercentile(finalScore);
-    const gradeStyle = GRADE_STYLE[finalGrade];
 
     return (
-      <div className="flex w-full max-w-md flex-col items-center gap-4 px-2 py-5 sm:max-w-lg sm:gap-5 sm:px-4 sm:py-6">
+      <div className="result-screen flex w-full max-w-md flex-col items-center gap-5 px-2 py-5 sm:max-w-lg sm:gap-6 sm:px-4 sm:py-6">
         <AdSlot slotId="final-top" variant="top" />
-        <h2 className="text-2xl font-bold text-amber-900">챌린지 완료!</h2>
-        <p className="text-sm text-amber-700">{modeConfig.title}</p>
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.15em] text-indigo-600/80">
+            Challenge Complete
+          </p>
+          <h2 className="mt-1 text-3xl font-black text-amber-900">챌린지 완료!</h2>
+          <p className="mt-1 text-sm text-amber-700">{modeConfig.title}</p>
+        </div>
 
-        <div className="flex flex-col items-center rounded-2xl border-4 border-amber-600/30 bg-white/90 px-8 py-6 shadow-lg">
-          <span
-            className={`mb-3 flex h-14 w-14 items-center justify-center rounded-full text-2xl font-black ring-4 ${gradeStyle.bg} ${gradeStyle.text} ${gradeStyle.ring}`}
-          >
-            {finalGrade}
-          </span>
-          <p className="text-xs font-semibold uppercase tracking-wider text-amber-600">
-            최종 평균 점수
+        <ResultHeroCard
+          grade={finalGrade}
+          score={finalScore}
+          scoreSuffix=""
+          topPercentile={finalTopPercentile}
+          subtitle="최종 평균 점수"
+          label={`${modeConfig.totalQuestions}문제 평균 · / 100`}
+          userColor={result?.submitted}
+          targetColor={result?.target}
+          size="lg"
+        />
+
+        <div className="w-full rounded-2xl border border-amber-200/70 bg-white/80 p-4 shadow-sm">
+          <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-amber-600">
+            라운드별 점수
           </p>
-          <p className="text-6xl font-black text-amber-900">
-            {finalScore.toFixed(1)}
-          </p>
-          <p className="text-sm text-amber-600">/ 100</p>
-          <div className="mt-3">
-            <PercentileBadge topPercentile={finalTopPercentile} size="lg" />
+          <div className="grid w-full grid-cols-5 gap-1.5 sm:grid-cols-10">
+            {roundScores.map((score, i) => (
+              <div
+                key={i}
+                className="flex flex-col items-center rounded-xl bg-gradient-to-b from-white to-amber-50/80 px-1 py-2 ring-1 ring-amber-200/60"
+              >
+                <span className="text-[10px] font-medium text-amber-600">{i + 1}</span>
+                <span className="font-mono text-xs font-bold text-amber-900">
+                  {score.toFixed(0)}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-5 gap-1.5 sm:grid-cols-10">
-          {roundScores.map((score, i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center rounded-lg bg-amber-100/80 px-1 py-2"
-            >
-              <span className="text-[10px] text-amber-600">{i + 1}</span>
-              <span className="font-mono text-xs font-bold text-amber-900">
-                {score.toFixed(0)}
-              </span>
-            </div>
-          ))}
-        </div>
+        {shareCardData && <ShareResultPanel data={shareCardData} />}
 
         <AdSlot slotId="final-inline" variant="inline" />
 
-        <div className="flex w-full flex-col gap-2 sm:flex-row">
-          <button
-            type="button"
-            onClick={handleShare}
-            className="flex-1 rounded-xl bg-amber-600 py-3 font-semibold text-white shadow-md transition hover:bg-amber-700"
-          >
-            공유하기
-          </button>
-          <button
-            type="button"
-            onClick={handleRestartMarathon}
-            className="flex-1 rounded-xl border-2 border-amber-600 py-3 font-semibold text-amber-800 transition hover:bg-amber-50"
-          >
-            다시 도전
-          </button>
-        </div>
-        <ShareNotice message={shareMessage} />
+        <button
+          type="button"
+          onClick={handleRestartMarathon}
+          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 py-4 text-lg font-bold text-white shadow-lg transition hover:from-amber-600 hover:to-orange-600"
+        >
+          다시 도전
+        </button>
         <BackToHomeButton fullWidth />
         <AdSlot slotId="final-bottom" variant="bottom" />
       </div>
@@ -393,36 +336,29 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
   if (phase === "question-result" && result && isMarathon) {
     const grade =
       result.grade ?? getMatchGrade(result.percent, result.deltaE ?? 100);
-    const gradeStyle = GRADE_STYLE[grade];
 
     return (
-      <div className="flex w-full max-w-md flex-col items-center gap-4 px-2 py-5 sm:max-w-lg sm:gap-5 sm:px-4 sm:py-6">
+      <div className="result-screen flex w-full max-w-md flex-col items-center gap-5 px-2 py-5 sm:max-w-lg sm:gap-6 sm:px-4 sm:py-6">
         <BackToHomeButton className="self-start" />
-        <p className="text-sm font-semibold text-amber-600">
-          {questionIndex} / {modeConfig.totalQuestions} 문제 완료
-        </p>
-        <h2 className="text-xl font-bold text-amber-900">이번 문제 결과</h2>
-
-        <div className="flex flex-col items-center rounded-2xl border-2 border-amber-300/60 bg-white/90 px-6 py-5 shadow-sm">
-          <span
-            className={`mb-2 flex h-10 w-10 items-center justify-center rounded-full text-sm font-black ring-2 ${gradeStyle.bg} ${gradeStyle.text} ${gradeStyle.ring}`}
-          >
-            {grade}
-          </span>
-          <span className="text-4xl font-black text-amber-900">
-            {result.percent.toFixed(1)}%
-          </span>
-          <span className="mt-1 text-sm text-amber-700">{result.label}</span>
-          <div className="mt-3">
-            <PercentileBadge topPercentile={result.topPercentile} />
-          </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-indigo-600/80">
+            {questionIndex} / {modeConfig.totalQuestions} 문제 완료
+          </p>
+          <h2 className="mt-1 text-2xl font-black text-amber-900">이번 문제 결과</h2>
         </div>
 
-        <div className="flex items-center gap-4">
-          <ColorSwatch color={result.submitted} label="내 색" />
-          <span className="text-amber-500">vs</span>
-          <ColorSwatch color={result.target} label="타겟" />
-        </div>
+        <ResultHeroCard
+          grade={grade}
+          score={result.percent}
+          label={result.label}
+          topPercentile={result.topPercentile}
+          userColor={result.submitted}
+          targetColor={result.target}
+          paletteSnapshot={paletteSnapshot}
+          size="md"
+        />
+
+        {shareCardData && <ShareResultPanel data={shareCardData} compact />}
 
         <button
           type="button"
@@ -438,50 +374,34 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
   if (phase === "result" && result && !isMarathon) {
     const grade =
       result.grade ?? getMatchGrade(result.percent, result.deltaE ?? 100);
-    const gradeStyle = GRADE_STYLE[grade];
 
     return (
-      <div className="flex w-full max-w-md flex-col items-center gap-4 px-2 py-5 sm:max-w-lg sm:gap-5 sm:px-4 sm:py-6">
+      <div className="result-screen flex w-full max-w-md flex-col items-center gap-5 px-2 py-5 sm:max-w-lg sm:gap-6 sm:px-4 sm:py-6">
         <BackToHomeButton className="self-start" />
         <AdSlot slotId="result-top" variant="top" />
-        <h2 className="text-2xl font-bold text-amber-900">결과</h2>
-
-        <div className="relative w-full overflow-hidden rounded-2xl border-4 border-amber-700/40 shadow-xl">
-          {paletteSnapshot && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={paletteSnapshot}
-              alt="내 팔레트"
-              className="h-48 w-full object-cover"
-            />
-          )}
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px]">
-            <span
-              className={`mb-2 flex h-12 w-12 items-center justify-center rounded-full text-xl font-black ring-4 ${gradeStyle.bg} ${gradeStyle.text} ${gradeStyle.ring}`}
-            >
-              {grade}
-            </span>
-            <span className="text-6xl font-black text-white drop-shadow-lg">
-              {result.percent.toFixed(1)}%
-            </span>
-            <span className="mt-1 text-lg font-semibold text-amber-200">
-              {result.label}
-            </span>
-            <div className="mt-3">
-              <PercentileBadge topPercentile={result.topPercentile} size="lg" />
-            </div>
-          </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold uppercase tracking-[0.15em] text-indigo-600/80">
+            Result
+          </p>
+          <h2 className="mt-1 text-3xl font-black text-amber-900">결과</h2>
         </div>
 
-        <div className="flex w-full items-center justify-center gap-6">
-          <ColorSwatch color={result.submitted} label="내가 고른 색" />
-          <span className="text-2xl text-amber-600">vs</span>
-          <ColorSwatch color={result.target} label="타겟 색상" />
-        </div>
+        <ResultHeroCard
+          grade={grade}
+          score={result.percent}
+          label={result.label}
+          topPercentile={result.topPercentile}
+          userColor={result.submitted}
+          targetColor={result.target}
+          paletteSnapshot={paletteSnapshot}
+          size="lg"
+        />
 
         {result.breakdown && (
           <MatchBreakdownPanel breakdown={result.breakdown} />
         )}
+
+        {shareCardData && <ShareResultPanel data={shareCardData} />}
 
         <AdSlot slotId="result-inline" variant="inline" />
 
@@ -502,14 +422,6 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
               새 문제
             </button>
           </div>
-          <button
-            type="button"
-            onClick={handleShare}
-            className="w-full rounded-xl border border-amber-400 py-2.5 text-sm font-medium text-amber-800 transition hover:bg-amber-50"
-          >
-            공유하기
-          </button>
-          <ShareNotice message={shareMessage} />
           <BackToHomeButton fullWidth />
         </div>
 

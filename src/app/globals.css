@@ -18,3 +18,46 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes result-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.45s ease-out both;
+}
+
+.result-screen .result-hero__card {
+  animation: result-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.share-panel__preview {
+  background: linear-gradient(145deg, rgba(99, 102, 241, 0.08), rgba(251, 191, 36, 0.1));
+}
+
+.home-glow {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(251, 191, 36, 0.25), transparent),
+    linear-gradient(to bottom, #fffbeb, #fff7ed, #fef3c7);
+}
