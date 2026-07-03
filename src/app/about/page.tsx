@@ -1,5 +1,11 @@
 import LegalPageLayout from "@/components/LegalPageLayout";
-import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
+import {
+  CONTACT_EMAIL,
+  JWONLABS_PRIVACY_URL,
+  OPERATOR_NAME,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/siteConfig";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -11,10 +17,10 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <LegalPageLayout title="서비스 소개" updated="2026년 6월 24일">
+    <LegalPageLayout title="서비스 소개" updated="2026년 7월 3일">
       <p>
-        <strong>{SITE_NAME}</strong>({SITE_URL})는 누구나 쉽게 즐길 수 있는{" "}
-        <strong>색감 매칭 웹 게임</strong>입니다. 미술 수업의 색 혼합
+        <strong>{SITE_NAME}</strong>({SITE_URL})는 {OPERATOR_NAME}가 운영하는
+        무료 <strong>색감 매칭 웹 게임</strong>입니다. 미술 수업의 색 혼합
         실습처럼, 빨강·초록·파랑·흰 물감을 팔레트에 섞어 목표 색과 얼마나
         가깝게 맞출 수 있는지 도전합니다.
       </p>
@@ -38,24 +44,27 @@ export default function AboutPage() {
 
       <h2 className="pt-2 text-base font-semibold">운영 정보</h2>
       <p>
-        {SITE_NAME}는 개인이 운영하는 웹 서비스입니다. 서비스 품질 개선,
-        버그 신고, 제휴·광고 관련 문의는{" "}
+        {SITE_NAME}는 {OPERATOR_NAME}(
+        <a
+          href="https://jwonlabs.com"
+          className="underline underline-offset-2"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          jwonlabs.com
+        </a>
+        )에서 제공하는 웹 서비스입니다. 버그 신고, 제휴·광고 문의는{" "}
         <Link href="/contact" className="underline underline-offset-2">
           문의 페이지
-        </Link>
-        {CONTACT_EMAIL ? (
-          <>
-            {" "}
-            또는{" "}
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="underline underline-offset-2"
-            >
-              {CONTACT_EMAIL}
-            </a>
-          </>
-        ) : null}
-        로 보내 주시면 확인 후 답변드립니다.
+        </Link>{" "}
+        또는{" "}
+        <a
+          href={`mailto:${CONTACT_EMAIL}`}
+          className="underline underline-offset-2"
+        >
+          {CONTACT_EMAIL}
+        </a>
+        로 보내 주세요.
       </p>
 
       <h2 className="pt-2 text-base font-semibold">관련 페이지</h2>
@@ -69,6 +78,16 @@ export default function AboutPage() {
           <Link href="/privacy" className="underline underline-offset-2">
             개인정보 처리방침
           </Link>
+        </li>
+        <li>
+          <a
+            href={JWONLABS_PRIVACY_URL}
+            className="underline underline-offset-2"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            JWON Labs 공통 개인정보 처리방침
+          </a>
         </li>
         <li>
           <Link href="/terms" className="underline underline-offset-2">

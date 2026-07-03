@@ -1,5 +1,11 @@
 import LegalPageLayout from "@/components/LegalPageLayout";
-import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
+import {
+  CONTACT_EMAIL,
+  JWONLABS_PRIVACY_URL,
+  OPERATOR_NAME,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/siteConfig";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -11,21 +17,32 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPageLayout title="개인정보 처리방침" updated="2026년 6월 24일">
+    <LegalPageLayout title="개인정보 처리방침" updated="2026년 7월 3일">
       <p>
-        {SITE_NAME}({SITE_URL}, 이하 &quot;서비스&quot;)는 이용자의
-        개인정보를 중요하게 생각하며, 「개인정보 보호법」 등 관련 법령을
-        준수합니다. 본 방침은 서비스 이용 시 적용됩니다.
+        {SITE_NAME}({SITE_URL}, 이하 &quot;서비스&quot;)는 {OPERATOR_NAME}가
+        운영하는 무료 웹 게임입니다. 본 방침은 서비스 이용 시 적용되며,
+        「개인정보 보호법」 등 관련 법령을 준수합니다.
+      </p>
+      <p>
+        {OPERATOR_NAME} 공통 개인정보 처리방침:{" "}
+        <a
+          href={JWONLABS_PRIVACY_URL}
+          className="font-medium underline underline-offset-2"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {JWONLABS_PRIVACY_URL}
+        </a>
       </p>
 
       <h2 className="pt-2 text-base font-semibold">1. 수집하는 개인정보</h2>
       <p>
         서비스는 회원가입 없이 이용할 수 있습니다. 게임 플레이 기록(점수,
         선택 색상 등)은 <strong>브라우저 세션 내에서만</strong> 처리되며,
-        서비스 운영자가 별도의 서버에 저장하지 않습니다.
+        운영자가 별도의 데이터베이스에 저장하지 않습니다.
       </p>
       <p>
-        다만, 웹 서비스 제공 과정에서 아래 정보가 자동으로 생성·수집될 수
+        웹 서비스 제공 과정에서 아래 정보가 자동으로 생성·수집될 수
         있습니다.
       </p>
       <ul className="list-disc space-y-1 pl-5">
@@ -42,7 +59,7 @@ export default function PrivacyPage() {
         바탕으로 맞춤 광고를 게재하기 위해 쿠키를 사용할 수 있습니다.
       </p>
       <p>
-        Google의 광고 쿠키 사용으로 Google 및 파트너는 본 서비스 및/또는
+        Google의 광고 쿠키를 사용함으로써 Google 및 파트너는 본 서비스 및/또는
         다른 웹사이트 방문 기록을 바탕으로 광고를 게재할 수 있습니다.
       </p>
       <ul className="list-disc space-y-2 pl-5">
@@ -80,7 +97,7 @@ export default function PrivacyPage() {
           </a>
         </li>
         <li>
-          www.aboutads.info (미국):{" "}
+          aboutads.info (미국):{" "}
           <a
             href="https://www.aboutads.info/choices/"
             className="underline underline-offset-2"
@@ -91,7 +108,7 @@ export default function PrivacyPage() {
           </a>
         </li>
         <li>
-          www.youronlinechoices.eu (EU):{" "}
+          youronlinechoices.eu (EU):{" "}
           <a
             href="https://www.youronlinechoices.eu/"
             className="underline underline-offset-2"
@@ -103,9 +120,15 @@ export default function PrivacyPage() {
         </li>
       </ul>
       <p>
+        ads.txt:{" "}
+        <a href={`${SITE_URL}/ads.txt`} className="underline underline-offset-2">
+          {SITE_URL}/ads.txt
+        </a>
+      </p>
+      <p>
         이용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다. 쿠키
-        저장을 거부할 경우 일부 서비스 이용 또는 광고 표시에 제한이 있을
-        수 있습니다.
+        저장을 거부할 경우 일부 기능 또는 광고 표시에 제한이 있을 수
+        있습니다.
       </p>
 
       <h2 className="pt-2 text-base font-semibold">3. 개인정보의 이용 목적</h2>
@@ -118,9 +141,9 @@ export default function PrivacyPage() {
 
       <h2 className="pt-2 text-base font-semibold">4. 보관 기간</h2>
       <p>
-        서버에 별도 저장하지 않는 게임 데이터는 세션 종료 시 소멸합니다.
-        접속 로그 등은 호스팅 서비스(Vercel 등) 정책에 따라 일정 기간
-        보관될 수 있습니다.
+        게임 세션 데이터는 브라우저를 닫으면 소멸합니다. 접속 로그 등은
+        Cloudflare Workers 호스팅 정책에 따라 일정 기간 보관될 수
+        있습니다.
       </p>
 
       <h2 className="pt-2 text-base font-semibold">5. 아동의 개인정보</h2>
@@ -138,12 +161,12 @@ export default function PrivacyPage() {
       </p>
 
       <h2 className="pt-2 text-base font-semibold">7. 개인정보 보호책임자 및 문의</h2>
-      <p>
-        개인정보 관련 문의·불만·피해 구제는 아래로 연락해 주세요.
-      </p>
       <ul className="list-none space-y-1 pl-0">
         <li>
-          <strong>서비스명:</strong> {SITE_NAME}
+          <strong>운영:</strong> {OPERATOR_NAME}
+        </li>
+        <li>
+          <strong>서비스:</strong> {SITE_NAME}
         </li>
         <li>
           <strong>문의 페이지:</strong>{" "}
@@ -151,24 +174,21 @@ export default function PrivacyPage() {
             {SITE_URL}/contact
           </Link>
         </li>
-        {CONTACT_EMAIL ? (
-          <li>
-            <strong>이메일:</strong>{" "}
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="underline underline-offset-2"
-            >
-              {CONTACT_EMAIL}
-            </a>
-          </li>
-        ) : null}
+        <li>
+          <strong>이메일:</strong>{" "}
+          <a
+            href={`mailto:${CONTACT_EMAIL}`}
+            className="underline underline-offset-2"
+          >
+            {CONTACT_EMAIL}
+          </a>
+        </li>
       </ul>
 
       <h2 className="pt-2 text-base font-semibold">8. 방침 변경</h2>
       <p>
         본 방침은 법령·서비스 변경에 따라 수정될 수 있으며, 변경 시 본
-        페이지에 게시합니다. 중요한 변경이 있는 경우 서비스 내 공지할 수
-        있습니다.
+        페이지에 게시합니다.
       </p>
 
       <p className="pt-2 text-xs text-amber-700/80">
@@ -176,6 +196,15 @@ export default function PrivacyPage() {
         <Link href="/terms" className="underline underline-offset-2">
           이용약관
         </Link>
+        {" · "}
+        <a
+          href={JWONLABS_PRIVACY_URL}
+          className="underline underline-offset-2"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          JWON Labs 공통 방침
+        </a>
       </p>
     </LegalPageLayout>
   );

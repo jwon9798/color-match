@@ -1,4 +1,10 @@
-import { CONTACT_EMAIL, LEGAL_PAGES, SITE_NAME } from "@/lib/siteConfig";
+import {
+  CONTACT_EMAIL,
+  JWONLABS_PRIVACY_URL,
+  LEGAL_PAGES,
+  OPERATOR_NAME,
+  SITE_NAME,
+} from "@/lib/siteConfig";
 import Link from "next/link";
 
 export default function SiteFooter() {
@@ -24,40 +30,36 @@ export default function SiteFooter() {
 
         <div className="space-y-1 text-center text-xs leading-relaxed text-amber-700/90">
           <p>
-            {SITE_NAME} — 무료 웹 색감 매칭 게임 · 설치 없이 브라우저에서 플레이
+            {SITE_NAME} — {OPERATOR_NAME} · 무료 웹 색감 매칭 게임
           </p>
-          {CONTACT_EMAIL ? (
-            <p>
-              문의:{" "}
-              <a
-                href={`mailto:${CONTACT_EMAIL}`}
-                className="font-medium text-amber-900 underline-offset-2 hover:underline"
-              >
-                {CONTACT_EMAIL}
-              </a>
-            </p>
-          ) : (
-            <p>
-              문의:{" "}
-              <Link
-                href="/contact"
-                className="font-medium text-amber-900 underline-offset-2 hover:underline"
-              >
-                문의하기 페이지
-              </Link>
-            </p>
-          )}
+          <p>
+            문의:{" "}
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="font-medium text-amber-900 underline-offset-2 hover:underline"
+            >
+              {CONTACT_EMAIL}
+            </a>
+          </p>
           <p className="text-amber-600/80">
-            © {year} {SITE_NAME}. All rights reserved.
+            © {year} {OPERATOR_NAME}. All rights reserved.
           </p>
         </div>
 
         <p className="text-center text-[10px] leading-relaxed text-amber-600/70">
-          본 사이트는 Google AdSense를 통해 광고를 게재할 수 있습니다.{" "}
+          Google AdSense 광고가 게재될 수 있습니다.{" "}
           <Link href="/privacy" className="underline underline-offset-2">
-            개인정보 처리방침
+            서비스 개인정보 처리방침
           </Link>
-          을 확인해 주세요.
+          {" · "}
+          <a
+            href={JWONLABS_PRIVACY_URL}
+            className="underline underline-offset-2"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            JWON Labs 공통 방침
+          </a>
         </p>
       </div>
     </footer>

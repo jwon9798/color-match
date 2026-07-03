@@ -1,6 +1,10 @@
 import AdSlot from "@/components/AdSlot";
 import BrandIcon from "@/components/BrandIcon";
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/siteConfig";
+import {
+  OPERATOR_NAME,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+} from "@/lib/siteConfig";
 import Link from "next/link";
 
 export default function HomeMenu() {
@@ -16,6 +20,17 @@ export default function HomeMenu() {
           </h1>
           <p className="mt-2 text-sm text-amber-700 sm:text-base">
             {SITE_DESCRIPTION}
+          </p>
+          <p className="mt-1 text-xs text-amber-600/90">
+            by{" "}
+            <a
+              href="https://jwonlabs.com"
+              className="font-medium underline-offset-2 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {OPERATOR_NAME}
+            </a>
           </p>
         </header>
 

@@ -1,5 +1,5 @@
 import LegalPageLayout from "@/components/LegalPageLayout";
-import { CONTACT_EMAIL, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
+import { CONTACT_EMAIL, OPERATOR_NAME, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -10,10 +10,11 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPageLayout title="이용약관" updated="2026년 6월 24일">
+    <LegalPageLayout title="이용약관" updated="2026년 7월 3일">
       <p>
-        본 약관은 {SITE_NAME}({SITE_URL}, 이하 &quot;서비스&quot;) 이용과
-        관련하여 서비스와 이용자 간의 권리·의무 및 책임 사항을 규정합니다.
+        본 약관은 {OPERATOR_NAME}가 운영하는 {SITE_NAME}({SITE_URL}, 이하
+        &quot;서비스&quot;) 이용과 관련하여 서비스와 이용자 간의 권리·의무
+        및 책임 사항을 규정합니다.
       </p>
 
       <h2 className="pt-2 text-base font-semibold">제1조 (목적)</h2>

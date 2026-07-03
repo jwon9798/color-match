@@ -1,0 +1,17 @@
+/_next/static/*
+  Cache-Control: public,max-age=31536000,immutable
+
+/icons/*
+  Cache-Control: public,max-age=86400
+
+/favicon.ico
+  Cache-Control: public,max-age=86400
+
+/ads.txt
+  Cache-Control: public,max-age=3600
+
+/sitemap.xml
+  Cache-Control: public,max-age=3600
+
+/robots.txt
+  Cache-Control: public,max-age=3600
