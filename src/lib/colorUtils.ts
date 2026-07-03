@@ -24,6 +24,8 @@ export type MatchBreakdown = {
 export type MatchEvaluation = {
   /** 종합 일치율 (소수 1자리) */
   percent: number;
+  /** 추정 상위 percentile (0.5 = 상위 0.5%) */
+  topPercentile: number;
   deltaE: number;
   grade: MatchGrade;
   label: string;
@@ -308,14 +310,76 @@ export function getMatchLabel(percent: number, _deltaE?: number): string {
   return "다시 도전해보세요!";
 }
 
+/** 점수 → 추정 상위 percentile (플레이어 분포 모델) */
+const SCORE_TO_TOP_PERCENTILE: readonly [score: number, topPct: number][] = [
+  [100, 0.5],
+  [98, 1.2],
+  [94, 4],
+  [90, 7],
+  [86, 11],
+  [80, 18],
+  [70, 30],
+  [60, 42],
+  [50, 55],
+  [45, 62],
+  [35, 75],
+  [25, 86],
+  [15, 94],
+  [5, 98.5],
+  [0, 99.5],
+];
+
+function interpolateAnchorsDesc(
+  value: number,
+  anchors: readonly [number, number][],
+): number {
+  if (value >= anchors[0][0]) return anchors[0][1];
+  const last = anchors[anchors.length - 1];
+  if (value <= last[0]) return last[1];
+
+  for (let i = 0; i < anchors.length - 1; i++) {
+    const [x0, y0] = anchors[i];
+    const [x1, y1] = anchors[i + 1];
+    if (value <= x0 && value >= x1) {
+      const t = (x0 - value) / (x0 - x1);
+      return y0 + (y1 - y0) * t;
+    }
+  }
+  return last[1];
+}
+
+/** 점수(0–100)에 대한 추정 상위 percentile — 낮을수록 상위권 */
+export function getTopPercentile(percent: number): number {
+  const raw = interpolateAnchorsDesc(
+    Math.max(0, Math.min(100, percent)),
+    SCORE_TO_TOP_PERCENTILE,
+  );
+  return Math.round(raw * 10) / 10;
+}
+
+/** UI용 상위 percentile 문구 */
+export function formatTopPercentile(topPercentile: number): string {
+  if (!Number.isFinite(topPercentile)) return "";
+  if (topPercentile < 1) return "상위 1% 미만";
+  if (topPercentile < 10) {
+    const rounded = Math.round(topPercentile * 10) / 10;
+    return Number.isInteger(rounded)
+      ? `상위 ${rounded}%`
+      : `상위 ${rounded.toFixed(1)}%`;
+  }
+  return `상위 ${Math.round(topPercentile)}%`;
+}
+
 export function evaluateMatch(submitted: RGB, target: RGB): MatchEvaluation {
   const analysis = analyzeMatch(submitted, target);
 
   const percent =
     Math.round(Math.max(0, Math.min(100, analysis.percent)) * 10) / 10;
+  const topPercentile = getTopPercentile(percent);
 
   return {
     percent,
+    topPercentile,
     deltaE: analysis.breakdown.deltaE,
     grade: getMatchGradeFromPercent(percent),
     label: getMatchLabel(percent),

@@ -3,6 +3,7 @@
 import AdSlot from "@/components/AdSlot";
 import ColorSwatch from "@/components/ColorSwatch";
 import MatchBreakdownPanel from "@/components/MatchBreakdownPanel";
+import PercentileBadge from "@/components/PercentileBadge";
 import PaletteCanvas, {
   type BrushSizeKey,
   type BrushTool,
@@ -18,6 +19,8 @@ import {
   generateTarget,
   getMatchGrade,
   getMatchGradeFromPercent,
+  getTopPercentile,
+  formatTopPercentile,
   rgbToCss,
   type MatchEvaluation,
   type MatchGrade,
@@ -267,18 +270,20 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
 
   const buildShareText = useCallback((): string | null => {
     if (phase === "final-result" && isMarathon && roundScores.length > 0) {
-      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${averageScore(roundScores).toFixed(1)}점 / 100`;
+      const avg = averageScore(roundScores);
+      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${avg.toFixed(1)}점 · ${formatTopPercentile(getTopPercentile(avg))}`;
     }
 
     if (!result) return null;
 
     if (isMarathon) {
       const scores = roundScores.length > 0 ? roundScores : [result.percent];
-      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${averageScore(scores).toFixed(1)}점 / 100`;
+      const avg = averageScore(scores);
+      return `🎨 컬러 매처 ${modeConfig.title}\n평균 ${avg.toFixed(1)}점 · ${formatTopPercentile(getTopPercentile(avg))}`;
     }
 
     const deltaE = result.deltaE ?? 0;
-    return `🎨 컬러 매처\n${result.grade}등급 · ${result.percent.toFixed(1)}% 일치! (ΔE ${deltaE.toFixed(1)})`;
+    return `🎨 컬러 매처\n${result.grade}등급 · ${result.percent.toFixed(1)}% · ${formatTopPercentile(result.topPercentile)} (ΔE ${deltaE.toFixed(1)})`;
   }, [phase, isMarathon, roundScores, result, modeConfig.title]);
 
   const handleShare = useCallback(async () => {
@@ -319,6 +324,7 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
   if (phase === "final-result" && isMarathon) {
     const finalScore = averageScore(roundScores);
     const finalGrade = getMatchGradeFromPercent(finalScore);
+    const finalTopPercentile = getTopPercentile(finalScore);
     const gradeStyle = GRADE_STYLE[finalGrade];
 
     return (
@@ -340,6 +346,9 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
             {finalScore.toFixed(1)}
           </p>
           <p className="text-sm text-amber-600">/ 100</p>
+          <div className="mt-3">
+            <PercentileBadge topPercentile={finalTopPercentile} size="lg" />
+          </div>
         </div>
 
         <div className="grid w-full grid-cols-5 gap-1.5 sm:grid-cols-10">
@@ -404,6 +413,9 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
             {result.percent.toFixed(1)}%
           </span>
           <span className="mt-1 text-sm text-amber-700">{result.label}</span>
+          <div className="mt-3">
+            <PercentileBadge topPercentile={result.topPercentile} />
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -455,6 +467,9 @@ export default function ColorMatcherGame({ mode }: ColorMatcherGameProps) {
             <span className="mt-1 text-lg font-semibold text-amber-200">
               {result.label}
             </span>
+            <div className="mt-3">
+              <PercentileBadge topPercentile={result.topPercentile} size="lg" />
+            </div>
           </div>
         </div>
 
