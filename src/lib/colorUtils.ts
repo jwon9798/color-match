@@ -181,19 +181,39 @@ const OKLCH_C_ANCHORS: readonly [number, number][] = [
   [0.35, 0],
 ];
 
+/** OKLab 지각 거리 → 0–100 (종합 점수의 주 축) */
+const OKLAB_DIST_ANCHORS: readonly [number, number][] = [
+  [0, 100],
+  [0.005, 98],
+  [0.01, 95],
+  [0.015, 92],
+  [0.025, 86],
+  [0.04, 78],
+  [0.06, 68],
+  [0.08, 58],
+  [0.1, 50],
+  [0.13, 40],
+  [0.17, 30],
+  [0.22, 22],
+  [0.28, 14],
+  [0.35, 8],
+  [0.45, 3],
+  [0.6, 0],
+];
+
 /** 색상각 차이(°) → 0–100 — 채도 가중 적용 후 */
 const OKLCH_H_ANCHORS: readonly [number, number][] = [
   [0, 100],
   [3, 97],
-  [6, 93],
-  [10, 87],
-  [15, 78],
-  [20, 70],
-  [30, 55],
-  [45, 38],
-  [60, 24],
-  [90, 8],
-  [120, 2],
+  [6, 92],
+  [10, 85],
+  [15, 75],
+  [20, 65],
+  [30, 48],
+  [45, 28],
+  [60, 14],
+  [90, 4],
+  [120, 0],
   [180, 0],
 ];
 
@@ -202,14 +222,52 @@ const MID_CHROMA = 0.08;
 
 type MatchWeights = { lightness: number; hue: number; chroma: number };
 
-function getMatchWeights(avgChroma: number): MatchWeights {
+function getMatchWeights(avgChroma: number, minChroma: number): MatchWeights {
+  let weights: MatchWeights;
   if (avgChroma < LOW_CHROMA) {
-    return { lightness: 0.6, chroma: 0.3, hue: 0.1 };
+    weights = { lightness: 0.6, chroma: 0.3, hue: 0.1 };
+  } else if (avgChroma < MID_CHROMA) {
+    weights = { lightness: 0.35, chroma: 0.25, hue: 0.4 };
+  } else {
+    weights = { lightness: 0.3, chroma: 0.15, hue: 0.55 };
   }
-  if (avgChroma < MID_CHROMA) {
-    return { lightness: 0.35, chroma: 0.25, hue: 0.4 };
+
+  // 한쪽이 거의 무채색이면 색상(hue) 비교 신뢰도가 낮음
+  if (minChroma < LOW_CHROMA) {
+    const hueReliability = minChroma / LOW_CHROMA;
+    const hueW = weights.hue * hueReliability;
+    const remainder = weights.hue - hueW;
+    weights = {
+      ...weights,
+      hue: hueW,
+      lightness: weights.lightness + remainder * 0.55,
+      chroma: weights.chroma + remainder * 0.45,
+    };
   }
-  return { lightness: 0.3, chroma: 0.15, hue: 0.55 };
+
+  return weights;
+}
+
+function hueMatchScore(submitted: OkLch, target: OkLch): {
+  score: number;
+  rawDiff: number;
+} {
+  const minChroma = Math.min(submitted.C, target.C);
+  const rawDiff = hueDifferenceDeg(submitted.H, target.H);
+
+  if (submitted.C < LOW_CHROMA && target.C < LOW_CHROMA) {
+    return { score: 100, rawDiff: 0 };
+  }
+
+  // 한쪽만 무채색이면 hue 각도가 불안정 — 중립 처리
+  if (minChroma < LOW_CHROMA) {
+    return { score: 50, rawDiff: rawDiff };
+  }
+
+  return {
+    score: interpolateAnchors(rawDiff, OKLCH_H_ANCHORS),
+    rawDiff,
+  };
 }
 
 function interpolateAnchors(value: number, anchors: readonly [number, number][]): number {
@@ -228,38 +286,36 @@ function interpolateAnchors(value: number, anchors: readonly [number, number][])
   return 0;
 }
 
-function analyzeOklchMatch(submitted: OkLch, target: OkLch) {
+function analyzeOklchMatch(submitted: OkLch, target: OkLch, distance: number) {
   const dL = Math.abs(submitted.L - target.L);
   const dC = Math.abs(submitted.C - target.C);
   const avgChroma = (submitted.C + target.C) / 2;
   const minChroma = Math.min(submitted.C, target.C);
-  const maxChroma = Math.max(submitted.C, target.C, 1e-6);
 
-  const rawHueDiff = hueDifferenceDeg(submitted.H, target.H);
-  const chromaFactor = minChroma / maxChroma;
-  const effectiveHueDiff =
-    avgChroma < LOW_CHROMA ? 0 : rawHueDiff * chromaFactor;
+  const { score: hueScore } = hueMatchScore(submitted, target);
 
   const lightnessScore = interpolateAnchors(dL, OKLCH_L_ANCHORS);
   const chromaScore = interpolateAnchors(dC, OKLCH_C_ANCHORS);
-  const hueScore =
-    avgChroma < LOW_CHROMA
-      ? 100
-      : interpolateAnchors(effectiveHueDiff, OKLCH_H_ANCHORS);
+  const distanceScore = interpolateAnchors(distance, OKLAB_DIST_ANCHORS);
 
-  const weights = getMatchWeights(avgChroma);
-  const percent =
+  const weights = getMatchWeights(avgChroma, minChroma);
+  const componentScore =
     lightnessScore * weights.lightness +
     hueScore * weights.hue +
     chromaScore * weights.chroma;
 
+  // 지각 거리(OKLab)를 주축으로, 분해 점수는 보조
+  const percent = distanceScore * 0.65 + componentScore * 0.35;
+
   return {
     dL,
     dC,
-    effectiveHueDiff,
     avgChroma,
+    minChroma,
     weights,
     percent,
+    distanceScore,
+    componentScore,
     lightnessScore,
     hueScore,
     chromaScore,
@@ -271,8 +327,8 @@ function analyzeMatch(submitted: RGB, target: RGB) {
   const oklabT = rgbToOklab(target);
   const oklchS = oklabToOklch(oklabS);
   const oklchT = oklabToOklch(oklabT);
-  const analysis = analyzeOklchMatch(oklchS, oklchT);
   const distance = oklabDistance(oklabS, oklabT);
+  const analysis = analyzeOklchMatch(oklchS, oklchT, distance);
 
   return {
     ...analysis,
@@ -303,10 +359,10 @@ export function getMatchGradeFromPercent(percent: number): MatchGrade {
 export function getMatchLabel(percent: number, _deltaE?: number): string {
   if (percent >= 98) return "완벽한 색감!";
   if (percent >= 94) return "거의 구분 안 돼요!";
-  if (percent >= 90) return "아주 비슷해요!";
-  if (percent >= 80) return "꽤 가까워요";
-  if (percent >= 65) return "조금 더 섞어보세요?";
-  if (percent >= 45) return "색감 차이가 있어요";
+  if (percent >= 88) return "아주 비슷해요!";
+  if (percent >= 75) return "꽤 가까워요";
+  if (percent >= 55) return "조금 더 섞어보세요?";
+  if (percent >= 35) return "색감 차이가 있어요";
   return "다시 도전해보세요!";
 }
 

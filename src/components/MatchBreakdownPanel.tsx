@@ -53,7 +53,7 @@ export default function MatchBreakdownPanel({
         })}
       </div>
       <p className="mt-3 text-[10px] leading-relaxed text-amber-600/80">
-        OKLCH 밝기·색상·채도 일치도를 가중 합산한 종합 점수입니다. 색상(hue)을 가장 중요하게 봅니다.
+        OKLCH 지각 거리와 밝기·색상·채도 일치도를 함께 반영한 종합 점수입니다. 색상(hue) 차이가 크면 점수가 크게 낮아집니다.
       </p>
     </div>
   );
