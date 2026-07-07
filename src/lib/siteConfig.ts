@@ -14,7 +14,7 @@ export const JWONLABS_PRIVACY_URL = "https://jwonlabs.com/privacy.html";
 
 /** Google Analytics 4 측정 ID */
 export const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-TRNR6LECH2";
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-C24JK5CTF0";
 
 export const LEGAL_PAGES = [
   { href: "/guide", label: "게임 가이드" },
