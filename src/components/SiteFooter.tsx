@@ -47,7 +47,7 @@ export default function SiteFooter() {
         </div>
 
         <p className="text-center text-[10px] leading-relaxed text-amber-600/70">
-          Google AdSense 광고가 게재될 수 있습니다.{" "}
+          Google Analytics 4 및 Google AdSense가 사용될 수 있습니다.{" "}
           <Link href="/privacy" className="underline underline-offset-2">
             서비스 개인정보 처리방침
           </Link>

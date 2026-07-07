@@ -1,4 +1,6 @@
 import CookieConsent from "@/components/CookieConsent";
+import ConsentBootstrap from "@/components/ConsentBootstrap";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import SiteFooter from "@/components/SiteFooter";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
 import type { Metadata, Viewport } from "next";
@@ -81,6 +83,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <GoogleAnalytics />
+        <ConsentBootstrap />
         <GoogleAdSense />
         <div className="flex min-h-full flex-1 flex-col">{children}</div>
         <SiteFooter />

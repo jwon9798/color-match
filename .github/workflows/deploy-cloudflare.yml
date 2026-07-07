@@ -33,6 +33,7 @@ jobs:
           cat > .env.production <<EOF
           NEXT_PUBLIC_SITE_URL=https://color-matcher.jwonlabs.com
           NEXT_PUBLIC_CONTACT_EMAIL=jwon9798@gmail.com
+          NEXT_PUBLIC_GA_MEASUREMENT_ID=G-TRNR6LECH2
           NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT=ca-pub-4911271163170466
           GOOGLE_ADSENSE_PUBLISHER_ID=pub-4911271163170466
           EOF
@@ -44,5 +45,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           NEXT_PUBLIC_SITE_URL: https://color-matcher.jwonlabs.com
           NEXT_PUBLIC_CONTACT_EMAIL: jwon9798@gmail.com
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-TRNR6LECH2
           NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT: ca-pub-4911271163170466
           GOOGLE_ADSENSE_PUBLISHER_ID: pub-4911271163170466

@@ -12,6 +12,10 @@ export const CONTACT_EMAIL =
 /** JWON Labs 공통 개인정보 처리방침 */
 export const JWONLABS_PRIVACY_URL = "https://jwonlabs.com/privacy.html";
 
+/** Google Analytics 4 측정 ID */
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "G-TRNR6LECH2";
+
 export const LEGAL_PAGES = [
   { href: "/guide", label: "게임 가이드" },
   { href: "/about", label: "소개" },

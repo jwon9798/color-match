@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPageLayout title="이용약관" updated="2026년 7월 3일">
+    <LegalPageLayout title="이용약관" updated="2026년 7월 7일">
       <p>
         본 약관은 {OPERATOR_NAME}가 운영하는 {SITE_NAME}({SITE_URL}, 이하
         &quot;서비스&quot;) 이용과 관련하여 서비스와 이용자 간의 권리·의무
@@ -47,11 +47,16 @@ export default function TermsPage() {
         수 없습니다.
       </p>
 
-      <h2 className="pt-2 text-base font-semibold">제5조 (광고)</h2>
+      <h2 className="pt-2 text-base font-semibold">제5조 (분석 및 광고)</h2>
       <p>
-        서비스는 Google AdSense 등 제3자 광고 네트워크를 통해 광고를
-        게재할 수 있습니다. 광고 클릭 및 제3자 사이트 이용은 해당
-        광고주·제3자의 정책에 따릅니다.
+        서비스는 Google Analytics 4를 통해 방문 통계를 수집하고, Google
+        AdSense 등 제3자 광고 네트워크를 통해 광고를 게재할 수 있습니다.
+        쿠키·분석·광고 관련 사항은{" "}
+        <Link href="/privacy" className="underline underline-offset-2">
+          개인정보 처리방침
+        </Link>
+        을 따릅니다. 광고 클릭 및 제3자 사이트 이용은 해당 광고주·제3자의
+        정책에 따릅니다.
       </p>
 
       <h2 className="pt-2 text-base font-semibold">제6조 (면책)</h2>
