@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SITE_NAME } from "@/lib/siteConfig";
 import { useEffect, useState } from "react";
 import {
   applyConsent,
@@ -32,10 +33,9 @@ export default function CookieConsent() {
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-3">
         <p className="text-xs leading-relaxed text-amber-900/90 sm:text-sm">
-          본 사이트는 서비스 운영, <strong>Google Analytics 4</strong> 방문
-          통계 분석, <strong>Google AdSense</strong> 광고 게재를 위해 쿠키 및
-          유사 기술을 사용할 수 있습니다. 동의하시면 분석·광고 목적의 쿠키가
-          저장됩니다. 자세한 내용은{" "}
+          {SITE_NAME}는 <strong>무료 서비스</strong>입니다. 방문 통계 분석을
+          위해 <strong>Google Analytics 4</strong>가 쿠키를 사용할 수 있습니다.
+          동의하시면 분석 목적의 쿠키가 활성화됩니다. 자세한 내용은{" "}
           <Link
             href="/privacy"
             className="font-medium text-amber-800 underline underline-offset-2"

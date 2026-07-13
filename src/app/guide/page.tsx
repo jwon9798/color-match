@@ -118,11 +118,12 @@ export default function GuidePage() {
         <div>
           <dt className="font-semibold">광고가 표시되나요?</dt>
           <dd className="mt-1 text-amber-900/85">
-            Google AdSense를 통해 광고가 게재될 수 있습니다. 자세한 내용은{" "}
+            현재 광고는 게재하지 않으며 <strong>무료</strong>로 이용할 수
+            있습니다. 향후 광고가 도입될 경우{" "}
             <Link href="/privacy" className="underline underline-offset-2">
               개인정보 처리방침
             </Link>
-            을 참고해 주세요.
+            을 통해 안내합니다.
           </dd>
         </div>
         <div>

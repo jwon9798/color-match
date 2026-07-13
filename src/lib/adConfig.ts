@@ -22,8 +22,9 @@ export const GOOGLE_ADSENSE_CLIENT =
   "ca-pub-4911271163170466";
 
 export const ADS_ENABLED =
-  process.env.NEXT_PUBLIC_ADS_ENABLED !== "false" &&
-  GOOGLE_ADSENSE_CLIENT.length > 0;
+  process.env.NEXT_PUBLIC_ADS_ENABLED === "true" &&
+  GOOGLE_ADSENSE_CLIENT.length > 0 &&
+  (process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_SLOT?.length ?? 0) > 0;
 
 const DEFAULT_SLOT = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_SLOT ?? "";
 

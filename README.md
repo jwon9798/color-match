@@ -32,12 +32,21 @@ npm run deploy
 
 환경 변수 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 필요.
 
-## AdSense
+## AdSense (승인 전 비활성)
+
+승인 전에는 AdSense 스크립트·광고 슬롯이 **로드되지 않습니다** (`NEXT_PUBLIC_ADS_ENABLED=false`).
+
+승인 후:
+
+1. AdSense에서 광고 단위 생성
+2. GitHub Actions / `.env.production`에 설정:
+   - `NEXT_PUBLIC_ADS_ENABLED=true`
+   - `NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT=ca-pub-4911271163170466`
+   - `NEXT_PUBLIC_GOOGLE_ADSENSE_SLOT=<광고단위ID>`
+3. 재배포
 
 - Publisher: `pub-4911271163170466`
-- Client: `ca-pub-4911271163170466`
-- `/ads.txt` — 서브도메인 루트에 제공
-- jwonlabs.com 루트 `ads.txt`에 `subdomain=color-matcher.jwonlabs.com` 추가 권장
+- `/ads.txt` — 서브도메인 루트에 제공 (인증용, 스크립트와 별개)
 
 ### 심사용 페이지
 

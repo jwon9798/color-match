@@ -1,11 +1,12 @@
 import CookieConsent from "@/components/CookieConsent";
 import ConsentBootstrap from "@/components/ConsentBootstrap";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import GoogleAdSense from "@/components/GoogleAdSense";
 import SiteFooter from "@/components/SiteFooter";
+import { ADS_ENABLED } from "@/lib/adConfig";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/siteConfig";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import GoogleAdSense from "@/components/GoogleAdSense";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -85,7 +86,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <GoogleAnalytics />
         <ConsentBootstrap />
-        <GoogleAdSense />
+        {ADS_ENABLED ? <GoogleAdSense /> : null}
         <div className="flex min-h-full flex-1 flex-col">{children}</div>
         <SiteFooter />
         <CookieConsent />

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPageLayout title="개인정보 처리방침" updated="2026년 7월 7일">
+    <LegalPageLayout title="개인정보 처리방침" updated="2026년 7월 13일">
       <p>
         {SITE_NAME}({SITE_URL}, 이하 &quot;서비스&quot;)는 {OPERATOR_NAME}가
         운영하는 무료 웹 게임입니다. 본 방침은 서비스 이용 시 적용되며,
@@ -104,12 +104,13 @@ export default function PrivacyPage() {
         차단하면 GA4 데이터 수집이 제한될 수 있습니다.
       </p>
 
-      <h2 className="pt-2 text-base font-semibold">3. Google AdSense 및 광고 쿠키</h2>
+      <h2 className="pt-2 text-base font-semibold">3. Google AdSense (향후 도입 시)</h2>
       <p>
-        본 서비스는 Google LLC가 제공하는{" "}
-        <strong>Google AdSense</strong>를 통해 광고를 게재할 수 있습니다.
-        Google을 포함한 제3자 광고 공급업체는 이용자의 이전 방문 기록을
-        바탕으로 맞춤 광고를 게재하기 위해 쿠키를 사용할 수 있습니다.
+        현재 본 서비스에는 광고를 게재하지 않습니다. Google AdSense 승인
+        후 광고가 도입될 수 있으며, 이 경우 Google LLC가 제공하는{" "}
+        <strong>Google AdSense</strong>를 통해 광고가 표시될 수 있습니다.
+        도입 시 본 방침을 업데이트하며, Google 및 제3자 광고 공급업체는
+        쿠키를 사용할 수 있습니다.
       </p>
       <p>
         Google의 광고 쿠키를 사용함으로써 Google 및 파트너는 본 서비스 및/또는
@@ -188,7 +189,7 @@ export default function PrivacyPage() {
       <ul className="list-disc space-y-1 pl-5">
         <li>웹 게임 서비스 제공 및 운영</li>
         <li>서비스 품질 개선, 오류 분석, 방문 통계(GA4)</li>
-        <li>광고 게재(Google AdSense 등)</li>
+        <li>향후 광고 게재 시 광고 운영(Google AdSense 등)</li>
         <li>법령 준수 및 분쟁 대응</li>
       </ul>
 

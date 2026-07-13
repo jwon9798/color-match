@@ -49,22 +49,7 @@ export default function AdSlot({
   }, [showLiveAd, adUnit]);
 
   if (!showLiveAd) {
-    if (process.env.NODE_ENV !== "development") {
-      return null;
-    }
-
-    return (
-      <aside
-        data-ad-slot={slotId}
-        aria-label="광고 영역"
-        className={`flex w-full flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-stone-300 bg-stone-100/80 px-4 py-3 ${VARIANT_CLASS[variant]} ${className}`}
-      >
-        <span className="text-[10px] font-medium uppercase tracking-widest text-stone-400">
-          Advertisement
-        </span>
-        <span className="text-xs text-stone-400/90">{slotId}</span>
-      </aside>
-    );
+    return null;
   }
 
   const isSide = slotId === "side-left" || slotId === "side-right";

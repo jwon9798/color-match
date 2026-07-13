@@ -1,3 +1,5 @@
+import { ADS_ENABLED } from "@/lib/adConfig";
+
 export const CONSENT_STORAGE_KEY = "color-match-consent";
 const LEGACY_CONSENT_KEY = "color-match-cookie-consent";
 
@@ -23,6 +25,13 @@ const CONSENT_PARAMS: Record<ConsentStatus, Record<string, string>> = {
     ad_personalization: "denied",
     analytics_storage: "denied",
   },
+};
+
+const ANALYTICS_ONLY_GRANTED = {
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+  analytics_storage: "granted",
 };
 
 export function getStoredConsent(): ConsentStatus | null {
@@ -53,6 +62,12 @@ export function setStoredConsent(status: ConsentStatus): void {
 
 export function applyConsent(status: ConsentStatus): void {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+
+  if (status === "granted" && !ADS_ENABLED) {
+    window.gtag("consent", "update", ANALYTICS_ONLY_GRANTED);
+    return;
+  }
+
   window.gtag("consent", "update", CONSENT_PARAMS[status]);
 }
 

@@ -34,7 +34,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL=https://color-matcher.jwonlabs.com
           NEXT_PUBLIC_CONTACT_EMAIL=jwon9798@gmail.com
           NEXT_PUBLIC_GA_MEASUREMENT_ID=G-C24JK5CTF0
-          NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT=ca-pub-4911271163170466
+          NEXT_PUBLIC_ADS_ENABLED=false
           GOOGLE_ADSENSE_PUBLISHER_ID=pub-4911271163170466
           EOF
 
@@ -46,5 +46,5 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://color-matcher.jwonlabs.com
           NEXT_PUBLIC_CONTACT_EMAIL: jwon9798@gmail.com
           NEXT_PUBLIC_GA_MEASUREMENT_ID: G-C24JK5CTF0
-          NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT: ca-pub-4911271163170466
+          NEXT_PUBLIC_ADS_ENABLED: "false"
           GOOGLE_ADSENSE_PUBLISHER_ID: pub-4911271163170466
